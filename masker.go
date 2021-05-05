@@ -4,18 +4,6 @@ import (
 	"strings"
 )
 
-const (
-	MPassword       = "password"
-	MName           = "name"
-	MEmail          = "email"
-	MMobile         = "mobile"
-	MLastFourDigits = "last_four_digits"
-	MCreditCard     = "credit_card"
-	MPassportSeries = "passport_series"
-	MPassportNumber = "passport_number"
-	MCode           = "code"
-)
-
 type Masker struct{}
 
 func (m *Masker) overlay(str string, overlay string, start int, end int) string {
@@ -43,31 +31,6 @@ func (m *Masker) overlay(str string, overlay string, start int, end int) string 
 	}
 
 	return string(r[:start]) + overlay + string(r[end:])
-}
-
-func (m *Masker) String(t string, i string) string {
-	switch t {
-	default:
-		return i
-	case MPassword:
-		return m.Password(i)
-	case MName:
-		return m.Name(i)
-	case MEmail:
-		return m.Email(i)
-	case MMobile:
-		return m.Mobile(i)
-	case MLastFourDigits:
-		return m.LastFourDigits(i)
-	case MCreditCard:
-		return m.CreditCard(i)
-	case MPassportSeries:
-		return m.PassportSeries(i)
-	case MPassportNumber:
-		return m.PassportNumber(i)
-	case MCode:
-		return m.Code(i)
-	}
 }
 
 func (m *Masker) Name(i string) string {
