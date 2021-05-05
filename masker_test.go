@@ -88,8 +88,8 @@ func TestMasker_overlay(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			m := &Masker{}
-			if got := m.overlay(tt.args.str, tt.args.overlay, tt.args.start, tt.args.end); got != tt.want {
-				t.Errorf("Masker.overlay() = %v, want %v", got, tt.want)
+			if got := m.mask(tt.args.str, tt.args.overlay, tt.args.start, tt.args.end); got != tt.want {
+				t.Errorf("Masker.mask() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -325,14 +325,14 @@ func TestMobile(t *testing.T) {
 			args: args{
 				i: "79191232323",
 			},
-			want: "7919***2323",
+			want: "7919*****23",
 		},
 		{
 			name: "Correct",
 			args: args{
 				i: "78432232323",
 			},
-			want: "7843***2323",
+			want: "7843*****23",
 		},
 	}
 	for _, tt := range tests {
@@ -401,11 +401,11 @@ func TestPassportSeries(t *testing.T) {
 			want: "",
 		},
 		{
-			name: "Correct",
+			name: "Length Lower 4",
 			args: args{
-				i: "1234",
+				i: "123",
 			},
-			want: "1**4",
+			want: "****",
 		},
 		{
 			name: "Correct",
@@ -441,11 +441,11 @@ func TestPassportNumber(t *testing.T) {
 			want: "",
 		},
 		{
-			name: "Correct",
+			name: "Length Lower 6",
 			args: args{
-				i: "123456",
+				i: "1234",
 			},
-			want: "1****6",
+			want: "******",
 		},
 		{
 			name: "Correct",
@@ -581,6 +581,27 @@ func TestLastFourDigits(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := LastFourDigits(tt.args.i); got != tt.want {
 				t.Errorf("LastFourDigits() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func BenchmarkStringMethods(b *testing.B) {
+	testsForStruct := []struct {
+		name string
+		make func()
+	}{
+		{
+			"masker LastFourDigits",
+			func() { LastFourDigits("79191232323") },
+		},
+	}
+	for _, tt := range testsForStruct {
+		tt := tt
+		b.Run(tt.name, func(b *testing.B) {
+			b.ReportAllocs()
+			for i := 0; i < b.N; i++ {
+				tt.make()
 			}
 		})
 	}
