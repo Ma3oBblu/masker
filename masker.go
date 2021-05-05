@@ -1,18 +1,24 @@
 package masker
 
-import "strings"
+import (
+	"strings"
+)
 
 const (
-	MPassword   = "password"
-	MName       = "name"
-	MEmail      = "email"
-	MMobile     = "mobile"
-	MCreditCard = "creditcard"
+	MPassword       = "password"
+	MName           = "name"
+	MEmail          = "email"
+	MMobile         = "mobile"
+	MLastFourDigits = "last_four_digits"
+	MCreditCard     = "credit_card"
+	MPassportSeries = "passport_series"
+	MPassportNumber = "passport_number"
+	MCode           = "code"
 )
 
 type Masker struct{}
 
-func (m *Masker) overlay(str string, overlay string, start int, end int) (overlayed string) {
+func (m *Masker) overlay(str string, overlay string, start int, end int) string {
 	r := []rune(str)
 	l := len(r)
 
@@ -33,16 +39,10 @@ func (m *Masker) overlay(str string, overlay string, start int, end int) (overla
 		end = l
 	}
 	if start > end {
-		tmp := start
-		start = end
-		end = tmp
+		start, end = end, start
 	}
 
-	overlayed = ""
-	overlayed += string(r[:start])
-	overlayed += overlay
-	overlayed += string(r[end:])
-	return overlayed
+	return string(r[:start]) + overlay + string(r[end:])
 }
 
 func (m *Masker) String(t string, i string) string {
@@ -57,36 +57,46 @@ func (m *Masker) String(t string, i string) string {
 		return m.Email(i)
 	case MMobile:
 		return m.Mobile(i)
+	case MLastFourDigits:
+		return m.LastFourDigits(i)
 	case MCreditCard:
 		return m.CreditCard(i)
+	case MPassportSeries:
+		return m.PassportSeries(i)
+	case MPassportNumber:
+		return m.PassportNumber(i)
+	case MCode:
+		return m.Code(i)
 	}
 }
 
 func (m *Masker) Name(i string) string {
 	l := len([]rune(i))
-
 	if l == 0 {
 		return ""
 	}
 
-	// if has space
-	if strs := strings.Split(i, " "); len(strs) > 1 {
-		tmp := make([]string, len(strs))
-		for idx, str := range strs {
-			tmp[idx] = m.Name(str)
+	// если есть пробел
+	i = strings.Trim(i, " ")
+	if chunks := strings.Split(i, " "); len(chunks) > 1 {
+		tmp := make([]string, 0, l)
+		for _, v := range chunks {
+			if v != "" {
+				tmp = append(tmp, m.Name(v))
+			}
 		}
 		return strings.Join(tmp, " ")
 	}
 
 	if l == 2 || l == 3 {
-		return m.overlay(i, "**", 1, 2)
+		return m.overlay(i, "*", 1, 2)
 	}
 
 	if l > 3 {
 		return m.overlay(i, "**", 1, 3)
 	}
 
-	return "**"
+	return "*"
 }
 
 func (m *Masker) CreditCard(i string) string {
@@ -103,13 +113,9 @@ func (m *Masker) Email(i string) string {
 		return ""
 	}
 
-	tmp := strings.Split(i, "@")
-	addr := tmp[0]
-	domain := tmp[1]
+	chunks := strings.Split(i, "@")
 
-	addr = m.overlay(addr, "****", 3, 7)
-
-	return addr + "@" + domain
+	return m.overlay(chunks[0], "****", 3, 7) + "@" + chunks[1]
 }
 
 func (m *Masker) Mobile(i string) string {
@@ -125,6 +131,49 @@ func (m *Masker) Password(i string) string {
 		return ""
 	}
 	return "************"
+}
+
+func (m *Masker) PassportSeries(i string) string {
+	l := len([]rune(i))
+	if l == 0 {
+		return ""
+	}
+	return m.overlay(i, "**", 1, 3)
+}
+
+func (m *Masker) PassportNumber(i string) string {
+	l := len([]rune(i))
+	if l == 0 {
+		return ""
+	}
+	return m.overlay(i, "****", 1, 5)
+}
+
+func (m *Masker) Code(i string) string {
+	l := len([]rune(i))
+	if l == 0 {
+		return ""
+	}
+	if l == 1 {
+		return "*"
+	}
+	if l == 2 || l == 3 {
+		return m.overlay(i, strings.Repeat("*", l-1), 1, l)
+	}
+	return m.overlay(i, strings.Repeat("*", l-2), 1, l-1)
+}
+
+func (m *Masker) LastFourDigits(i string) string {
+	l := len([]rune(i))
+	if l == 0 {
+		return ""
+	}
+
+	if l < 5 {
+		return "****"
+	}
+
+	return m.overlay(i, strings.Repeat("*", l-4), 0, l-4)
 }
 
 // New create Masker
@@ -156,4 +205,20 @@ func Mobile(i string) string {
 
 func Password(i string) string {
 	return instance.Password(i)
+}
+
+func PassportSeries(i string) string {
+	return instance.PassportSeries(i)
+}
+
+func PassportNumber(i string) string {
+	return instance.PassportNumber(i)
+}
+
+func Code(i string) string {
+	return instance.Code(i)
+}
+
+func LastFourDigits(i string) string {
+	return instance.LastFourDigits(i)
 }

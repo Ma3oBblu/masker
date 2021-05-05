@@ -195,7 +195,7 @@ func TestMasker_Name(t *testing.T) {
 			args: args{
 				i: "А",
 			},
-			want: "**",
+			want: "*",
 		},
 		{
 			name: "Russian Length 2",
@@ -203,7 +203,7 @@ func TestMasker_Name(t *testing.T) {
 			args: args{
 				i: "Яр",
 			},
-			want: "Я**",
+			want: "Я*",
 		},
 		{
 			name: "Russian Length 3",
@@ -211,7 +211,7 @@ func TestMasker_Name(t *testing.T) {
 			args: args{
 				i: "Юра",
 			},
-			want: "Ю**а",
+			want: "Ю*а",
 		},
 		{
 			name: "Russian Length 4",
@@ -242,6 +242,14 @@ func TestMasker_Name(t *testing.T) {
 			m:    New(),
 			args: args{
 				i: "Виктор Иванов",
+			},
+			want: "В**тор И**нов",
+		},
+		{
+			name: "Russian Full Name With Spaces",
+			m:    New(),
+			args: args{
+				i: "  Виктор   Иванов   ",
 			},
 			want: "В**тор И**нов",
 		},
@@ -356,6 +364,13 @@ func TestMasker_Email(t *testing.T) {
 				i: "tt@gmail.com",
 			},
 			want: "tt****@gmail.com",
+		},
+		{
+			name: "Address Less Equal 1",
+			args: args{
+				i: "t@gmail.com",
+			},
+			want: "t****@gmail.com",
 		},
 	}
 	for _, tt := range tests {
@@ -495,21 +510,21 @@ func TestName(t *testing.T) {
 			args: args{
 				i: "А",
 			},
-			want: "**",
+			want: "*",
 		},
 		{
 			name: "Russian Length 2",
 			args: args{
 				i: "Яр",
 			},
-			want: "Я**",
+			want: "Я*",
 		},
 		{
 			name: "Russian Length 3",
 			args: args{
 				i: "Юра",
 			},
-			want: "Ю**а",
+			want: "Ю*а",
 		},
 		{
 			name: "Russian Length 4",
@@ -640,6 +655,13 @@ func TestEmail(t *testing.T) {
 			},
 			want: "tt****@gmail.com",
 		},
+		{
+			name: "Address Less Equal 1",
+			args: args{
+				i: "t@gmail.com",
+			},
+			want: "t****@gmail.com",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -725,6 +747,208 @@ func TestPassword(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := Password(tt.args.i); got != tt.want {
 				t.Errorf("Password() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestPassportSeries(t *testing.T) {
+	type args struct {
+		i string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "Empty Input",
+			args: args{
+				i: "",
+			},
+			want: "",
+		},
+		{
+			name: "Correct",
+			args: args{
+				i: "1234",
+			},
+			want: "1**4",
+		},
+		{
+			name: "Correct",
+			args: args{
+				i: "9267",
+			},
+			want: "9**7",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := PassportSeries(tt.args.i); got != tt.want {
+				t.Errorf("PassportSeries() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestPassportNumber(t *testing.T) {
+	type args struct {
+		i string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "Empty Input",
+			args: args{
+				i: "",
+			},
+			want: "",
+		},
+		{
+			name: "Correct",
+			args: args{
+				i: "123456",
+			},
+			want: "1****6",
+		},
+		{
+			name: "Correct",
+			args: args{
+				i: "926734",
+			},
+			want: "9****4",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := PassportNumber(tt.args.i); got != tt.want {
+				t.Errorf("PassportNumber() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCode(t *testing.T) {
+	type args struct {
+		i string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "Empty Input",
+			args: args{
+				i: "",
+			},
+			want: "",
+		},
+		{
+			name: "Length Equal 1",
+			args: args{
+				i: "1",
+			},
+			want: "*",
+		},
+		{
+			name: "Length Equal 2",
+			args: args{
+				i: "12",
+			},
+			want: "1*",
+		},
+		{
+			name: "Length Equal 3",
+			args: args{
+				i: "123",
+			},
+			want: "1**",
+		},
+		{
+			name: "Length Equal 4",
+			args: args{
+				i: "1234",
+			},
+			want: "1**4",
+		},
+		{
+			name: "Length Equal 5",
+			args: args{
+				i: "12345",
+			},
+			want: "1***5",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := Code(tt.args.i); got != tt.want {
+				t.Errorf("Code() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestLastFourDigits(t *testing.T) {
+	type args struct {
+		i string
+	}
+	tests := []struct {
+		name string
+		args args
+		want string
+	}{
+		{
+			name: "Empty Input",
+			args: args{
+				i: "",
+			},
+			want: "",
+		},
+		{
+			name: "Length Equal 1",
+			args: args{
+				i: "1",
+			},
+			want: "****",
+		},
+		{
+			name: "Length Equal 2",
+			args: args{
+				i: "12",
+			},
+			want: "****",
+		},
+		{
+			name: "Length Equal 3",
+			args: args{
+				i: "123",
+			},
+			want: "****",
+		},
+		{
+			name: "Length Equal 4",
+			args: args{
+				i: "1234",
+			},
+			want: "****",
+		},
+		{
+			name: "Length Equal 9",
+			args: args{
+				i: "79191232323",
+			},
+			want: "*******2323",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := LastFourDigits(tt.args.i); got != tt.want {
+				t.Errorf("LastFourDigits() = %v, want %v", got, tt.want)
 			}
 		})
 	}
