@@ -121,7 +121,7 @@ func (m *Masker) Mobile(i string) string {
 	return m.mask(i, "*****", 4, 9)
 }
 
-// Password максирует пароль заданной маской
+// Password маскирует пароль заданной маской
 func (m *Masker) Password(i string) string {
 	l := len([]rune(i))
 	if l == 0 {
@@ -154,7 +154,7 @@ func (m *Masker) PassportNumber(i string) string {
 
 // Code маскирует код из цифр
 // для кодов состоящих из меньше чем 4 символов, оставляет первый символ
-// для кодо большей длины оставляет первый и последний символ
+// для кодов большей длины оставляет первый и последний символ
 func (m *Masker) Code(i string) string {
 	if len(i) == 0 {
 		return ""
